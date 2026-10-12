@@ -6,7 +6,7 @@ A native Windows label editor for the Brother QL-810W and **DK-1221 0.9-inch squ
 
 ## Run
 
-1. Use Windows 10/11 on an x64 PC. Download the `Labels-windows-x64` artifact from a successful [Windows build](https://github.com/mtdewwolf/Labels/actions/workflows/windows.yml), or the ZIP from a published release. Extract all files.
+1. Use Windows 10/11 on an x64 PC. Download `Labels.exe` directly from a published release. Build artifacts from a successful [Windows build](https://github.com/mtdewwolf/Labels/actions/workflows/windows.yml) are also available as `Labels-windows-x64`; extract those before running.
 2. Install Brother's Windows QL-810W printer driver and connect the printer over USB or Wi-Fi through a Windows print queue. Load DK-1221 square labels. See [Brother support](https://support.brother.com/g/b/producttop.aspx?c=us&lang=en&prod=lpql810weus).
 3. Run `Labels.exe`. No separate .NET installation is required. The executable is currently unsigned.
 4. Enter the product name, barcode value, price, and quantity. Select the Brother printer; use **Refresh printers** after installing it.
@@ -44,4 +44,4 @@ dotnet run --project tests/Labels.Windows.Checks -c Release
 
 The core checks decode the actual barcode dot layout and test quiet zones, validation, saved labels, and media geometry. Windows checks decode rendered labels, check printable bounds, reject overflowing text, and open the editor. CI also launches and closes the packaged executable. CI uploads screenshots and sample labels alongside the Windows build artifact.
 
-To prepare a release, push a `v*` tag after verification. The workflow builds and checks Windows, then creates a **draft** GitHub release with a ZIP. Review and publish that draft after the physical-printer check. The application version is set in `src/Labels.Windows/Labels.Windows.csproj`; update it before tagging. No release is published automatically.
+To prepare a release, push a `v*` tag after verification. The workflow builds and checks Windows, then creates a **draft** GitHub release with `Labels.exe` as a direct download, alongside usage instructions, licenses, and its SHA256 checksum. Review and publish that draft after the physical-printer check. The application version is set in `src/Labels.Windows/Labels.Windows.csproj`; update it before tagging. No release is published automatically.

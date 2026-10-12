@@ -77,5 +77,4 @@ jobs:
           RELEASE_TAG: ${{ github.ref_name }}
         run: |
           cd release
-          zip -r ../Labels-windows-x64.zip .
-          gh release create "$RELEASE_TAG" ../Labels-windows-x64.zip --draft --generate-notes --title "Labels $RELEASE_TAG"
+          gh release create "$RELEASE_TAG" Labels.exe README.md THIRD-PARTY-NOTICES.md SHA256.txt licenses/*.txt --draft --generate-notes --title "Labels $RELEASE_TAG"
