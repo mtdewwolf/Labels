@@ -29,9 +29,15 @@ jobs:
         run: |
           $app = Start-Process -FilePath './dist/win-x64/Labels.exe' -PassThru
           try {
-            if (-not $app.WaitForInputIdle(30000)) { throw 'App did not become ready.' }
-            $app.Refresh()
-            if ($app.HasExited -or $app.MainWindowHandle -eq 0) { throw 'App did not create its editor window.' }
+            $deadline = [DateTime]::UtcNow.AddSeconds(30)
+            do {
+              $app.Refresh()
+              if ($app.HasExited) { throw "App exited during startup with code $($app.ExitCode)." }
+              if ($app.MainWindowHandle -ne 0) { break }
+              Start-Sleep -Milliseconds 250
+            } while ([DateTime]::UtcNow -lt $deadline)
+            if ($app.MainWindowHandle -eq 0) { throw 'App did not create its editor window within 30 seconds.' }
+            if (-not $app.WaitForInputIdle(10000)) { throw 'Editor did not become responsive.' }
             if (-not $app.CloseMainWindow()) { throw 'App did not accept a close request.' }
             if (-not $app.WaitForExit(10000)) { throw 'App did not close.' }
             if ($app.ExitCode -ne 0) { throw "App exited with code $($app.ExitCode)." }
