@@ -2,7 +2,7 @@
 
 # Labels for Windows
 
-A native Windows label editor for the Brother QL-810W and **DK-1221 0.9-inch square labels (23 × 23 mm)**. Create a product label with a USD price and Code 128 barcode, see a live preview, save/open label files, export a 300 DPI PNG, and print one or more copies.
+A native Windows label editor for the Brother QL-810W and **DK-1221 0.9-inch square labels (23 × 23 mm)**. Create a product label with a USD price and Code 128 barcode, see a live preview, save/open label files, export a 300 DPI PNG, and print. Stage several labels, each with its own quantity, and print that list as one job.
 
 ## Run
 
@@ -10,7 +10,8 @@ A native Windows label editor for the Brother QL-810W and **DK-1221 0.9-inch squ
 2. Install Brother's Windows QL-810W printer driver and connect the printer over USB or Wi-Fi through a Windows print queue. Load DK-1221 square labels. See [Brother support](https://support.brother.com/g/b/producttop.aspx?c=us&lang=en&prod=lpql810weus).
 3. Run `Labels.exe`. No separate .NET installation is required. The executable is currently unsigned.
 4. Enter the product name, barcode value, price, and quantity. Select the Brother printer; use **Refresh printers** after installing it.
-5. Choose **Print labels…**. Confirm the printer and **23 × 23 mm / DK-1221** media in the Windows print dialog. The dialog's final copy count is used. First print one label and scan it before printing a batch.
+5. Choose **Add to print list** for each item. The list prints in that order, with copies of each label together. Change a line with **Selected quantity**, reorder it, or double-click it to load it back into the editor. Then choose **Print list…**. Confirm the printer and **23 × 23 mm / DK-1221** media. Leave **Copies at 1** in that dialog; the quantities in the list are the job. A list can hold 100 different labels and 1,000 labels in total, and it lasts until you close the app.
+6. **Print this label…** prints only the label currently on screen. Its dialog copy count is the number of copies. First print one label and scan it before printing a batch.
 
 Printing requires the Brother driver, including when the printer is connected over Wi-Fi. A successful return from printing means Windows accepted the job; check the Windows queue for printer/offline/media errors. This app does not directly monitor printer hardware.
 
@@ -22,7 +23,7 @@ The physical label is 272 × 272 dots at 300 DPI. Brother specifies a printable 
 - The encoder keeps at least two printer dots per narrow module and ten quiet modules on each side. Oversized barcodes are rejected, never squeezed to fit. Even-length numeric IDs up to 10 digits or text IDs up to 5 characters normally fit. Mixed content and odd-length numbers can take more space.
 - Short product names work best. Text fits down to a minimum size and is rejected if it still overflows. Prices range from $0.00 to $9,999.99.
 - Two-dot modules are small (about 0.169 mm); scanner performance depends on equipment and print quality. Test the actual label with your scanner. This is not a claim of GS1 compliance or verified barcode quality.
-- Saved `.label.json` files contain product name, barcode, and price. Printer and quantity remain local editor choices. PNG exports include the full physical label and its white margins.
+- Saved `.label.json` files contain product name, barcode, and price. Printer, quantity, and the print list stay in the open editor. PNG exports include the full physical label and its white margins.
 
 Media dimensions come from [Brother's raster reference, page 15](https://download.brother.com/welcome/docp100278/cv_ql800_eng_raster_101.pdf) (PDF page 19). Physical printing, alignment, cutting, and scanning require verification with an actual QL-810W and DK-1221 roll.
 
