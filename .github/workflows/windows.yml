@@ -1,0 +1,75 @@
+name: Windows build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Check barcode and label rules
+        run: dotnet run --project tests/Labels.Checks -c Release
+      - name: Check Windows artwork and editor
+        run: dotnet run --project tests/Labels.Windows.Checks -c Release
+      - name: Build standalone executable
+        run: dotnet publish src/Labels.Windows -c Release -r win-x64 --self-contained true -o dist/win-x64
+      - name: Check packaged executable starts
+        shell: pwsh
+        run: |
+          $app = Start-Process -FilePath './dist/win-x64/Labels.exe' -PassThru
+          try {
+            if (-not $app.WaitForInputIdle(30000)) { throw 'App did not become ready.' }
+            $app.Refresh()
+            if ($app.HasExited -or $app.MainWindowHandle -eq 0) { throw 'App did not create its editor window.' }
+            if (-not $app.CloseMainWindow()) { throw 'App did not accept a close request.' }
+            if (-not $app.WaitForExit(10000)) { throw 'App did not close.' }
+            if ($app.ExitCode -ne 0) { throw "App exited with code $($app.ExitCode)." }
+          } finally {
+            if (-not $app.HasExited) { Stop-Process -Id $app.Id -Force }
+          }
+      - name: Package usage instructions
+        shell: pwsh
+        run: |
+          Copy-Item README.md, THIRD-PARTY-NOTICES.md dist/win-x64/
+          Copy-Item licenses dist/win-x64/licenses -Recurse
+          Get-FileHash dist/win-x64/Labels.exe -Algorithm SHA256 | Format-List | Out-File dist/win-x64/SHA256.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Labels-windows-x64
+          path: dist/win-x64/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Windows-check-images
+          path: dist/checks/
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: Labels-windows-x64
+          path: release
+      - name: Create draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          cd release
+          zip -r ../Labels-windows-x64.zip .
+          gh release create "$RELEASE_TAG" ../Labels-windows-x64.zip --draft --generate-notes --title "Labels $RELEASE_TAG"
